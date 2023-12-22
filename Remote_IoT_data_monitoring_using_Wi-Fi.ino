@@ -125,7 +125,6 @@ uint16_t readAnalog(uint8_t pinNum){
   
 }  
 
-
 void loop() {
 
   if (ESP.available() > 0) {
@@ -149,15 +148,7 @@ void loop() {
         delay(200);
         SendCommand("AT+CIPCLOSE=0");
     }
-    else if (!IsPageSent) {
-        SendWebPage();
-        String WebPage = "<style>@import url('https://fonts.googleapis.com/css2?family=Cairo');form{text-align:center;}button{background-color:#006E7F;margin:10px;border:none;font-size:1.2rem;border-radius:4px;padding:1px 28px;color:white;font-weight:bold}*{font-family:'Cairo', sans-serif;}</style>";
-        char command[30];
-        sprintf(command, "AT+CIPSEND=0,%d", WebPage.length());
-        SendCommand(command);
-        ESP.print(WebPage);
-        IsPageSent = true;
-    }
+    AbnormalConditions();
   }
 }
 
@@ -196,9 +187,12 @@ void TurnLedOff(int led) {
 void AbnormalConditions(){
   if(smokeValue > 220){
     SendCommand("AT+CIPSEND=0,42");
-    ESP.print("<script>alert('There is Smoke!!')</script>");
+    ESP.print("<script>alert('There is Smoke!!')</script>"); 
     }
-  
+  if(tempValue > 30){
+    SendCommand("AT+CIPSEND=0,46");
+    ESP.print("<script>alert('There is high temp!!')</script>"); 
+    }
 }
 
 
