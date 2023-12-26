@@ -16,7 +16,6 @@ uint16_t smokeValue;
 uint16_t tempValue;
 bool IsPageSent;
 String IP;
-//int motionValue;
 
 volatile bool readSensors = false;
 volatile bool motionDetected = false;
@@ -24,17 +23,17 @@ volatile bool motionDetected = false;
 void setup() {
   
   ESP.begin(115200);
-  Serial.begin(115200);
-  delay(100);
-  ConfigModule();
-  delay(1000);
-  lcd.begin(16 , 2);
+  Serial.begin(9600);
 
   // Set the pinMode for LED1 and LED2
   pinMode(LED1 , OUTPUT);
   pinMode(LED2 , OUTPUT);
 
-  
+  delay(100);
+  ConfigModule();
+  delay(1000);
+  lcd.begin(16 , 2);
+
   cli(); // Disable global interrupts
   // Set up enable external interrupt
   EICRA |= (1 << ISC01); // Trigger INT0 on falling edge
@@ -46,25 +45,26 @@ void setup() {
   // Set up timer and interrupt
   TCCR1A = 0; // Clear Timer/Counter1 Control Register A
   TCCR1B = 0; // Clear Timer/Counter1 Control Register B
-  TCNT1L = 0xED;     //Initial timer value = 65535 - 31250 = 34285 (in decimal)
-  TCNT1H = 0x85;     // Decimal 34285 = Hexadecimal 0x85ED
   TCCR1B |= (1 << CS12) | (1 << CS10); // Set timer prescaler to 1024
   TIMSK1 |= (1 << TOIE1); // Enable timer overflow interrupt
+  TCNT1L = 0xED;     //Initial timer value = 34285 (in decimal)
+  TCNT1H = 0x85;     // Decimal 34285 = Hexadecimal 0x85ED
 
-  
   sei(); // Enable global interrupts
   
-}
+} 
 
 void ConfigModule() {
   
   SendCommand("AT+RST");
+  delay(2000); // Wait for ESP8266 to reboot
   SendCommand("AT+CWLAP");
-  SendCommand("AT+CWJAP=\"Fifi\",\"o12w11h1a8s2\"");
+  SendCommand("AT+CWJAP=\"Mina\",\"00000000\"");
+  delay(2000);
   SendCommand("AT+CWMODE=1");
   SendCommand("AT+CIPMUX=1");   // Enable Multiple Connections
-  SendCommand("AT+CIPSERVER=1,80");
   IP = SendCommand("AT+CIFSR");
+  SendCommand("AT+CIPSERVER=1,80");
   Serial.print(IP);
 }
 
@@ -77,11 +77,9 @@ ISR(TIMER1_OVF_vect) {
     smokeValue = readAnalog(smokePin);
     tempValue = readAnalog(tempPin);
     motionDetected  = false;
+    float temperature = (tempValue * (5000 / 1024)) / 10;
 
-    float temperature = (tempValue * (5.0 / 1024.0)) * 100.0;
-
-    // ADMUX &= ~3;    // Clear Mux bits
-    // ADMUX &= ~3;    // Clear Mux bits
+      ADMUX &= ~3;    // Clear Mux bits
     
       lcd.clear();
       lcd.setCursor(0,0);
@@ -101,7 +99,6 @@ ISR(TIMER1_OVF_vect) {
 }
 
 ISR(INT0_vect) {
-  
   motionDetected = true;
   lcd.clear();
   lcd.print("Motion Detected!");
@@ -111,9 +108,10 @@ ISR(INT0_vect) {
 void Init_ADC(){
   
   ADCSRA |= (1<<ADEN);  // Enable the ADC
+
+
   ADMUX |= (1<<REFS0);  // Set reference voltage to AVcc (5V)
   ADCSRA |= (7<<ADPS0);  // Set ADC prescaler to 128
-
 }
 
 uint16_t readAnalog(uint8_t pinNum){
@@ -126,6 +124,9 @@ uint16_t readAnalog(uint8_t pinNum){
 }  
 
 void loop() {
+
+  digitalWrite(LED1,HIGH);
+  digitalWrite(LED2,HIGH);
 
   if (ESP.available() > 0) {
     String InputData = ESP.readString();
@@ -187,11 +188,11 @@ void TurnLedOff(int led) {
 void AbnormalConditions(){
   if(smokeValue > 220){
     SendCommand("AT+CIPSEND=0,42");
-    ESP.print("<script>alert('There is Smoke!!')</script>"); 
+    ESP.print("<script>alert('Smoke!!')</script>"); 
     }
   if(tempValue > 30){
     SendCommand("AT+CIPSEND=0,46");
-    ESP.print("<script>alert('There is high temp!!')</script>"); 
+    ESP.print("<script>alert('high temp!!')</script>");
     }
 }
 
