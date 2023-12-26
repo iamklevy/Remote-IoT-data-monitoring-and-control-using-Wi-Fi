@@ -1,0 +1,59 @@
+<html lang=\"en\">
+
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>LEDs Control</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #4CAF50;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        button.GBut {
+            background-color: #4CAF50;
+        }
+
+        button.SBut {
+            background-color: #d9534f;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>LEDs Control</h1>
+    <form method='get'><button class='GBut' name='GBut1' value='ON'>LED1 ON</button><button class='SBut' name='GBut1'
+            value='OFF'>LED1 OFF</button><button class='GBut' name='GBut2' value='ON'>LED2 ON</button><button
+            class='SBut' name='GBut2' value='OFF'>LED2 OFF</button></form>
+</body>
+
+</html>
